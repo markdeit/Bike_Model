@@ -96,7 +96,8 @@ function init() {
 
     // LIGHTS
 
-    ambientLight = new THREE.AmbientLight( 0x333333 );  // 0.2
+    //ambientLight = new THREE.AmbientLight( 0x333333 );  // 0.2
+	ambientLight = new THREE.AmbientLight( 0xFFFFFF );  // 0.2
 
     light = new THREE.DirectionalLight( 0xFFFFFF, 1.0 );
     // direction is set in GUI
@@ -179,7 +180,7 @@ function setupGui() {
 
         hue:        0.09,
         saturation: 0.46,
-        lightness:  0.9,
+        lightness:  0.1,
 
         lhue:        0.04,
         lsaturation: 0.01,  // so that fractions will be shown
@@ -337,7 +338,7 @@ function createShaderMaterial( id, light, ambientLight ) {
 
 }
 
-function getFrameMesh(frameGeo) {
+function getUIControlledMesh(frameGeo) {
     var framePart = new THREE.Mesh(
         frameGeo,
         wire ? wireMaterial : (
@@ -346,6 +347,20 @@ function getFrameMesh(frameGeo) {
             ( phong ? phongMaterial : gouraudMaterial ) ));
     return framePart;
 }
+
+function getWhiteFrameMesh(frameGeo) {
+	return new THREE.Mesh(
+			frameGeo,
+			new THREE.MeshPhongMaterial( { color : 0xFFFFFF, shininess: 400, specular: 0xFFFFFF, shading : THREE.SmoothShading } ) );
+}
+
+function getBlackFrameMesh(frameGeo) {
+	return new THREE.Mesh(
+			frameGeo,
+			new THREE.MeshPhongMaterial( { color : 0x000000, shininess: 100, specular : 0xFFFFFF, shading : THREE.SmoothShading } ) );
+			//new THREE.MeshPhongMaterial( { color : 0xFFFFFF, shininess: 400, specular: 0xFFFFFF, shading : THREE.SmoothShading } ) );
+}
+
 
 function getSaddle() {
 	var saddleShape = new THREE.Shape();
@@ -362,7 +377,7 @@ function getSaddle() {
 		
 	var extrudeSettings = { amount: 20, bevelEnabled: true, bevelSegments: 5, steps: 2, bevelSize: 10 };
 	var saddleGeometry = new THREE.ExtrudeGeometry( saddleShape, extrudeSettings );
-	var saddle = getFrameMesh(saddleGeometry);
+	var saddle = getWhiteFrameMesh(saddleGeometry);
 	saddle.rotation.x = 90 * Math.PI / 180;
 	
 	return saddle;
@@ -371,17 +386,17 @@ function getSaddle() {
 function getBikeFrame() {
 	var bikeFrame = new THREE.Object3D();
 	
-	var topTube = getFrameMesh(new THREE.CylinderGeometry( topTubeSeatR, topTubeHeadR, topTubeL, 16, 3, false));
+	var topTube = getWhiteFrameMesh(new THREE.CylinderGeometry( topTubeSeatR, topTubeHeadR, topTubeL, 16, 3, false));
     topTube.rotation.z = topTubeA * Math.PI/180;
     topTube.position.y = seatTubeVirtualL;
     topTube.position.x = topTubeL/2 - (Math.sin(seatTubeA * Math.PI/180) * seatTubeVirtualL);
 	bikeFrame.add( topTube );
     
 	var seatParts = new THREE.Object3D();
-    var seatTube = getFrameMesh(new THREE.CylinderGeometry( seatTubeR, seatTubeR, seatTubeL, 16, 3, false));
+    var seatTube = getWhiteFrameMesh(new THREE.CylinderGeometry( seatTubeR, seatTubeR, seatTubeL, 16, 3, false));
     seatTube.position.y = seatTubeL/2;
 	seatParts.add(seatTube);
-    var seatStem = getFrameMesh(new THREE.CylinderGeometry( seatStemR, seatStemR, seatStemL, 16, 3, false));
+    var seatStem = getBlackFrameMesh(new THREE.CylinderGeometry( seatStemR, seatStemR, seatStemL, 16, 3, false));
 	seatStem.position.y = seatStemL/2 + seatTubeL;
     seatParts.add(seatStem);
 	var saddle = getSaddle();
@@ -391,7 +406,7 @@ function getBikeFrame() {
     seatParts.rotation.z = seatTubeA * Math.PI/180;
 	bikeFrame.add( seatParts );
 	
-    var headTube = getFrameMesh(new THREE.CylinderGeometry( headTubeR, headTubeR, headTubeL, 16, 3, false));
+    var headTube = getWhiteFrameMesh(new THREE.CylinderGeometry( headTubeR, headTubeR, headTubeL, 16, 3, false));
     headTube.rotation.z = seatTubeA * Math.PI/180;
     headTube.position.y = topTube.position.y + Math.sin((topTubeA - 90) * Math.PI/180) * topTubeL - headTubeL/2 + headTubeOverTopTubeL;
     headTube.position.x = topTube.position.x + topTubeL/2 + headTubeR;
@@ -401,14 +416,14 @@ function getBikeFrame() {
     var downTubeOposite = topTube.position.x + topTubeL/2 + headTubeR;
     var downTubeAdjacent = headTube.position.y - headTubeL / 2 + headTubeR * 2;
     var downTubeL = Math.sqrt(Math.pow(downTubeOposite, 2) + Math.pow(downTubeAdjacent, 2));
-    tube = getFrameMesh(new THREE.CylinderGeometry( downTubeR, downTubeR, downTubeL, 16, 3, false));    
+    tube = getWhiteFrameMesh(new THREE.CylinderGeometry( downTubeR, downTubeR, downTubeL, 16, 3, false));    
     tube.position.y = downTubeL/2;
     var downTube = new THREE.Object3D();
     downTube.add(tube)
     downTube.rotation.z = -1 * Math.atan(downTubeOposite / downTubeAdjacent);
     bikeFrame.add( downTube );
 	
-    tube = getFrameMesh(new THREE.CylinderGeometry( chainStayBotR, chainStayTopR, chainStayL, 16, 3, false));
+    tube = getBlackFrameMesh(new THREE.CylinderGeometry( chainStayBotR, chainStayTopR, chainStayL, 16, 3, false));
     tube.position.y = chainStayL / 2;
     tube.position.z = downTubeR - chainStayTopR;
     var chainStayOpL = (rearAxelL / 2) - tube.position.z;
@@ -420,7 +435,7 @@ function getBikeFrame() {
     rightChainStay.position.z = chainStayOpL / 2;
 	bikeFrame.add( rightChainStay );
     
-    tube = getFrameMesh(new THREE.CylinderGeometry( chainStayBotR, chainStayTopR, chainStayL, 16, 3, false));
+    tube = getBlackFrameMesh(new THREE.CylinderGeometry( chainStayBotR, chainStayTopR, chainStayL, 16, 3, false));
     tube.position.y = chainStayL / 2;
     tube.position.z = -(downTubeR - chainStayTopR);
     tube.rotation.x = -chainStaySeparationAngle;
@@ -431,7 +446,7 @@ function getBikeFrame() {
 	bikeFrame.add( leftChainStay );
     
     var seatStayL = Math.sqrt(Math.pow(seatTubeVirtualL, 2) + Math.pow(chainStayL, 2) - (2 * seatTubeVirtualL * chainStayL * Math.cos((90 - seatTubeA)* Math.PI/180 - chainStayArad)));
-    tube = getFrameMesh(new THREE.CylinderGeometry( seatStayR, seatStayR, seatStayL, 16, 3, false));
+    tube = getBlackFrameMesh(new THREE.CylinderGeometry( seatStayR, seatStayR, seatStayL, 16, 3, false));
     tube.position.y = -seatStayL / 2;
     tube.position.z = seatTubeR - seatStayR;
     var seatStayOpL = (rearAxelL / 2) - tube.position.z;
@@ -447,7 +462,7 @@ function getBikeFrame() {
     rightSeatStay.position.x = seatStayTopX;
     bikeFrame.add( rightSeatStay );
 	
-    tube = getFrameMesh(new THREE.CylinderGeometry( seatStayR, seatStayR, seatStayL, 16, 3, false));
+    tube = getBlackFrameMesh(new THREE.CylinderGeometry( seatStayR, seatStayR, seatStayL, 16, 3, false));
     tube.position.y = -seatStayL / 2;
     tube.position.z = -(seatTubeR - seatStayR); 
     tube.rotation.x = seatStaySeparationAngle;  
@@ -463,7 +478,7 @@ function getBikeFrame() {
 }
 
 function getSpoke(spokeR, wheelDiam) {
-    return getFrameMesh(new THREE.CylinderGeometry( spokeR, spokeR, wheelDiam / 2, 16, 3, false));
+    return getWhiteFrameMesh(new THREE.CylinderGeometry( spokeR, spokeR, wheelDiam / 2, 16, 3, false));
 }
   
 function getRim(radius, width, depth) {
@@ -490,18 +505,19 @@ function getRim(radius, width, depth) {
     return rim3D
 }
 
-function getTire() {
-	return getFrameMesh(new THREE.TorusGeometry(tireR, tireW/2, 16, 100, Math.PI * 2));
-}
-
 function getRimTire() {
 	var rimTire = new THREE.Object3D();
-	var tire = getFrameMesh(new THREE.TorusGeometry(tireR, tireW/2, 16, 100, Math.PI * 2));
+	var tire = new THREE.Mesh(
+			new THREE.TorusGeometry(tireR, tireW/2, 16, 100, Math.PI * 2),
+			new THREE.MeshLambertMaterial( { color : '#000000', shading : THREE.SmoothShading } ) );
     rimTire.add( tire );
     
     var rimTireJoin = 5;
     var insideTireR = tireR - tireW / 2 + rimTireJoin;
-    var rim = getFrameMesh(getRim(insideTireR, rimW, rimD));
+    //var rim = getWhiteFrameMesh(getRim(insideTireR, rimW, rimD));
+	var rim = new THREE.Mesh(
+			getRim(insideTireR, rimW, rimD),
+			new THREE.MeshPhongMaterial( { color : 0x000000, shininess: 100, specular : 0xFFFFFF, shading : THREE.SmoothShading } ) );
     rim.position.z = rimW / 2;
     rimTire.add( rim );
 	
@@ -511,27 +527,27 @@ function getRimTire() {
 function getRearWheel() {
 	var rearWheel = new THREE.Object3D();
     
-    var rearAxel = getFrameMesh(new THREE.CylinderGeometry( rearAxelR, rearAxelR, rearAxelL, 16, 3, false));
+    var rearAxel = getWhiteFrameMesh(new THREE.CylinderGeometry( rearAxelR, rearAxelR, rearAxelL, 16, 3, false));
     rearAxel.rotation.x = 90 * Math.PI / 180;
     rearWheel.add(rearAxel);
 	
     var rearHub = new THREE.Object3D();
-    var rearHubCyl = getFrameMesh(new THREE.CylinderGeometry( rearHubR, rearHubR, rearHubD, 16, 3, false));
+    var rearHubCyl = getWhiteFrameMesh(new THREE.CylinderGeometry( rearHubR, rearHubR, rearHubD, 16, 3, false));
     rearHubCyl.rotation.x = 90 * Math.PI / 180;
     rearHub.add(rearHubCyl);
     
-	var leftHubSphere = getFrameMesh(new THREE.SphereGeometry(rearHubR - 1, 32, 32));
+	var leftHubSphere = getWhiteFrameMesh(new THREE.SphereGeometry(rearHubR - 1, 32, 32));
     leftHubSphere.position.z = -(rearHubD) / 2;
     var rearHubZOffset = rearAxelL / 2 - (rearHubD) / 2 - rearHubR - chainStayBotR - 2;
     rearHub.position.z = -rearHubZOffset;
     rearHub.add(leftHubSphere);
     
-    var leftRearHubFlang = getFrameMesh(new THREE.CylinderGeometry( rearHubFlangR, rearHubFlangR, rearHubFlangL, 16, 3, false));
+    var leftRearHubFlang = getWhiteFrameMesh(new THREE.CylinderGeometry( rearHubFlangR, rearHubFlangR, rearHubFlangL, 16, 3, false));
     leftRearHubFlang.rotation.x = 90 * Math.PI / 180;
     leftRearHubFlang.position.z = -(rearHubD) / 2;
     rearHub.add(leftRearHubFlang);
     
-	var rightRearHubFlang = getFrameMesh(new THREE.CylinderGeometry( rearHubFlangR, rearHubFlangR, rearHubFlangL, 16, 3, false));
+	var rightRearHubFlang = getWhiteFrameMesh(new THREE.CylinderGeometry( rearHubFlangR, rearHubFlangR, rearHubFlangL, 16, 3, false));
     rightRearHubFlang.rotation.x = 90 * Math.PI / 180;
     rightRearHubFlang.position.z = (rearHubD) / 2;
     rearHub.add(rightRearHubFlang);    
@@ -553,7 +569,7 @@ function getRearWheel() {
 	var hubz = i >= numRearSpokes ? -(rearHubD / 2 + rearHubZOffset) / 2 : (rearHubD / 2 - rearHubZOffset) / 2;
 	var spokeL = Math.sqrt(Math.pow(rimx - hubx, 2) + Math.pow(0 - huby, 2) + Math.pow(0 - hubz, 0));
 	
-	tube = getFrameMesh(new THREE.CylinderGeometry( spokeR, spokeR, spokeL, 16, 3, false));
+	tube = getWhiteFrameMesh(new THREE.CylinderGeometry( spokeR, spokeR, spokeL, 16, 3, false));
 	tube.position.y = spokeL / 2;	
 	tube.rotation.x = i >= numRearSpokes ? Math.asin((rearHubD / 2 + rearHubZOffset) / spokeL) : -Math.asin((rearHubD / 2 - rearHubZOffset) / spokeL);
 	
@@ -575,10 +591,10 @@ function getRearWheel() {
 function getFrontWheel(leftFork) {
 	var frontWheel = new THREE.Object3D();
     
-    var frontAxel = getFrameMesh(new THREE.CylinderGeometry( frontAxelR, frontAxelR, frontAxelL, 16, 3, false));
+    var frontAxel = getWhiteFrameMesh(new THREE.CylinderGeometry( frontAxelR, frontAxelR, frontAxelL, 16, 3, false));
     frontAxel.rotation.x = 90 * Math.PI / 180;
     frontWheel.add(frontAxel);
-    //var frontHub = getFrameMesh(new THREE.CylinderGeometry( frontHubR, frontHubR, frontHubL, 16, 3, false));
+    //var frontHub = getWhiteFrameMesh(new THREE.CylinderGeometry( frontHubR, frontHubR, frontHubL, 16, 3, false));
     //frontHub.rotation.x = 90 * Math.PI / 180;
 	var points = [];
 	var r = 268	//radius of the circle used to create the curve in the hub
@@ -586,13 +602,13 @@ function getFrontWheel(leftFork) {
 		points.push( new THREE.Vector3(frontHubR - (Math.sqrt(Math.pow(r, 2) - Math.pow(i - frontHubL / 2, 2)) - r), 0, i - frontHubL / 2 ));
 	}
 		
-	frontHub = getFrameMesh( new THREE.LatheGeometry( points, 20 ));	
+	frontHub = getWhiteFrameMesh( new THREE.LatheGeometry( points, 20 ));	
     frontWheel.add(frontHub);
-    var leftFrontHubSpokeRing = getFrameMesh(new THREE.CylinderGeometry( frontHubFlangR, frontHubFlangR, frontHubFlangL, 16, 3, false));
+    var leftFrontHubSpokeRing = getWhiteFrameMesh(new THREE.CylinderGeometry( frontHubFlangR, frontHubFlangR, frontHubFlangL, 16, 3, false));
     leftFrontHubSpokeRing.rotation.x = 90 * Math.PI / 180;
     leftFrontHubSpokeRing.position.z = -frontHubCentreToFlang;
     frontWheel.add(leftFrontHubSpokeRing);
-    var rightFrontHubSpokeRing = getFrameMesh(new THREE.CylinderGeometry( frontHubFlangR, frontHubFlangR, frontHubFlangL, 16, 3, false));
+    var rightFrontHubSpokeRing = getWhiteFrameMesh(new THREE.CylinderGeometry( frontHubFlangR, frontHubFlangR, frontHubFlangL, 16, 3, false));
     rightFrontHubSpokeRing.rotation.x = 90 * Math.PI / 180;
     rightFrontHubSpokeRing.position.z = frontHubCentreToFlang;
     frontWheel.add(rightFrontHubSpokeRing);    
@@ -604,7 +620,7 @@ function getFrontWheel(leftFork) {
     for (var i = 0; i < numFrontSpokes * 2; i++) {
 	var spokeA = (2 * Math.PI / numFrontSpokes) * i;
 	spokeA = i >= numFrontSpokes ? spokeA + (2 * Math.PI / (numFrontSpokes * 2)) : spokeA;
-	tube = getFrameMesh(new THREE.CylinderGeometry( spokeR, spokeR, spokeL, 16, 3, false));
+	tube = getWhiteFrameMesh(new THREE.CylinderGeometry( spokeR, spokeR, spokeL, 16, 3, false));
 	tube.position.y = spokeL / 2;
 	var xRot = Math.asin(frontHubCentreToFlang / spokeL);
 	tube.rotation.x = i >= numFrontSpokes ? xRot : -xRot;
@@ -625,7 +641,7 @@ function getFrontWheel(leftFork) {
  * function for debugging/testing
  */
 function makeSphere(vec) {
-	sphere = getFrameMesh(new THREE.SphereGeometry(10, 32, 32));
+	sphere = getWhiteFrameMesh(new THREE.SphereGeometry(10, 32, 32));
 	sphere.position.x = vec.x;
 	sphere.position.y = vec.y;
 	sphere.position.z = vec.z;
@@ -677,10 +693,10 @@ function getHandleBar() {
 	
 	var extrudeSettings = { amount: 200,  bevelEnabled: true, bevelSegments: 2, steps: 150 };
 	extrudeSettings.extrudePath = leftHandleBarCurve
-	var leftHandleBar = getFrameMesh(new THREE.TubeGeometry(extrudeSettings.extrudePath, 150, handleBarR, 20, false, true));
+	var leftHandleBar = getWhiteFrameMesh(new THREE.TubeGeometry(extrudeSettings.extrudePath, 150, handleBarR, 20, false, true));
 	handleBar.add( leftHandleBar );
 	
-	var leftCap = getFrameMesh(new THREE.CylinderGeometry( handleBarR, handleBarR, 2, 32, 3, false));
+	var leftCap = getWhiteFrameMesh(new THREE.CylinderGeometry( handleBarR, handleBarR, 2, 32, 3, false));
 	leftCap.rotation.z = 90 * Math.PI / 180;
 	leftCap.position.x = leftHandleBarCurvePoints[leftHandleBarCurvePoints.length - 1].x;
 	leftCap.position.y = leftHandleBarCurvePoints[leftHandleBarCurvePoints.length - 1].y;
@@ -702,10 +718,10 @@ function getHandleBar() {
 	var rightHandleBarCurve = new THREE.SplineCurve3(rightHandleBarCurvePoints);
 	
 	extrudeSettings.extrudePath = rightHandleBarCurve
-	var rightHandleBar = getFrameMesh(new THREE.TubeGeometry(extrudeSettings.extrudePath, 150, handleBarR, 20, false, true));
+	var rightHandleBar = getWhiteFrameMesh(new THREE.TubeGeometry(extrudeSettings.extrudePath, 150, handleBarR, 20, false, true));
 	handleBar.add( rightHandleBar );
 	
-	var rightCap = getFrameMesh(new THREE.CylinderGeometry( handleBarR, handleBarR, 2, 32, 3, false));
+	var rightCap = getWhiteFrameMesh(new THREE.CylinderGeometry( handleBarR, handleBarR, 2, 32, 3, false));
 	rightCap.rotation.z = 90 * Math.PI / 180;
 	rightCap.position.x = rightHandleBarCurvePoints[rightHandleBarCurvePoints.length - 1].x;
 	rightCap.position.y = rightHandleBarCurvePoints[rightHandleBarCurvePoints.length - 1].y;
@@ -718,11 +734,11 @@ function getHandleBar() {
 function getFrontFork(headTubeHeight) {
 	var frontFork = new THREE.Object3D();
 	
-	var headSetTube = getFrameMesh(new THREE.CylinderGeometry( headSetR, headSetR, headSetL, 16, 3, false));
+	var headSetTube = getBlackFrameMesh(new THREE.CylinderGeometry( headSetR, headSetR, headSetL, 16, 3, false));
 	frontFork.add( headSetTube );
 	
 	var steeringControls = new THREE.Object3D();
-    var stemTube = getFrameMesh(new THREE.CylinderGeometry( stemR, stemR, stemL, 16, 3, false));
+    var stemTube = getBlackFrameMesh(new THREE.CylinderGeometry( stemR, stemR, stemL, 16, 3, false));
 	steeringControls.add( stemTube );
 	
 	var handleBar = getHandleBar();
@@ -741,7 +757,7 @@ function getFrontFork(headTubeHeight) {
     //cone shape where top of fork enters head tube. Probable won't use it
     var forkTopL = 15;
     var forkTopBotR = headTubeR + 5;
-    var forkTop = getFrameMesh(new THREE.CylinderGeometry( headTubeR, forkTopBotR, forkTopL, 16, 3, false));
+    var forkTop = getWhiteFrameMesh(new THREE.CylinderGeometry( headTubeR, forkTopBotR, forkTopL, 16, 3, false));
     forkTop.position.y = -headSetL / 2 + forkTopL / 2;
     
     var headTubeToWheelBase = headTubeHeight - headTubeL/2 - (Math.cos(90 * Math.PI/180 - chainStayArad) * chainStayL);
@@ -750,7 +766,7 @@ function getFrontFork(headTubeHeight) {
     var forkSepA = Math.asin((120/2 - (headTubeR - forkTopR / 2)) / forkL);
     
     var forkTubes = new THREE.Object3D();
-    var tube = getFrameMesh(new THREE.CylinderGeometry( forkTopR / 2, forkBotR / 2, forkL, 16, 3, false));
+    var tube = getWhiteFrameMesh(new THREE.CylinderGeometry( forkTopR / 2, forkBotR / 2, forkL, 16, 3, false));
     tube.position.y = -forkL / 2;
     tube.scale.x = 2;
     tube.position.z = - (headTubeR - forkTopR / 2);    
@@ -759,7 +775,7 @@ function getFrontFork(headTubeHeight) {
     leftFork.rotation.x = forkSepA;   
     forkTubes.add(leftFork);
     
-    tube = getFrameMesh(new THREE.CylinderGeometry( forkTopR / 2, forkBotR / 2, forkL, 16, 3, false));	
+    tube = getWhiteFrameMesh(new THREE.CylinderGeometry( forkTopR / 2, forkBotR / 2, forkL, 16, 3, false));	
     tube.position.y = -forkL / 2;
     tube.scale.x = 2;
     tube.position.z = headTubeR - forkTopR / 2;
