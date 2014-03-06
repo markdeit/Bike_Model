@@ -84,6 +84,19 @@ var rimTireOverlap = 5;
 var insideTireR = tireR - tireW / 2 + rimTireOverlap;
 var handleBarR = 16;
 
+/* Colors */
+var spokeC = 0x3C3837;
+var spokeSpecC = 0x7D7573;
+var frameBlackC = 0x22222A;
+var frameBlackSpecC = 0xFFFFFF;
+var frameWhiteC = 0xFAFAFA;
+var frameWhiteSpecC = 0xFFFFFF;
+var rimC = 0x252628;
+var rimSpecC = 0x4A515B;
+var tireC = 0x2C2C2A;
+var hubC = 0x3C3B37;
+var hubSpecC = 0xE2E2E0;
+
 function init() {
     var canvasWidth = window.innerWidth;
     var canvasHeight = window.innerHeight;
@@ -351,16 +364,20 @@ function getUIControlledMesh(frameGeo) {
 function getWhiteFrameMesh(frameGeo) {
 	return new THREE.Mesh(
 			frameGeo,
-			new THREE.MeshPhongMaterial( { color : 0xFFFFFF, shininess: 400, specular: 0xFFFFFF, shading : THREE.SmoothShading } ) );
+			new THREE.MeshPhongMaterial( { color : frameWhiteSpecC, shininess: 400, specular: frameWhiteSpecC, shading : THREE.SmoothShading } ) );
 }
 
 function getBlackFrameMesh(frameGeo) {
 	return new THREE.Mesh(
 			frameGeo,
-			new THREE.MeshPhongMaterial( { color : 0x000000, shininess: 100, specular : 0xFFFFFF, shading : THREE.SmoothShading } ) );
-			//new THREE.MeshPhongMaterial( { color : 0xFFFFFF, shininess: 400, specular: 0xFFFFFF, shading : THREE.SmoothShading } ) );
+			new THREE.MeshPhongMaterial( { color : frameBlackC, shininess: 100, specular : frameBlackSpecC, shading : THREE.SmoothShading } ) );
 }
 
+function getHubMesh(frameGeo) {
+	return new THREE.Mesh(
+			frameGeo,
+			new THREE.MeshPhongMaterial( { color : hubC, shininess: 100, specular : hubSpecC, shading : THREE.SmoothShading } ) );
+}
 
 function getSaddle() {
 	var saddleShape = new THREE.Shape();
@@ -509,15 +526,14 @@ function getRimTire() {
 	var rimTire = new THREE.Object3D();
 	var tire = new THREE.Mesh(
 			new THREE.TorusGeometry(tireR, tireW/2, 16, 100, Math.PI * 2),
-			new THREE.MeshLambertMaterial( { color : '#000000', shading : THREE.SmoothShading } ) );
+			new THREE.MeshLambertMaterial( { color : tireC, shading : THREE.SmoothShading } ) );
     rimTire.add( tire );
     
     var rimTireJoin = 5;
     var insideTireR = tireR - tireW / 2 + rimTireJoin;
-    //var rim = getWhiteFrameMesh(getRim(insideTireR, rimW, rimD));
 	var rim = new THREE.Mesh(
 			getRim(insideTireR, rimW, rimD),
-			new THREE.MeshPhongMaterial( { color : 0x000000, shininess: 100, specular : 0xFFFFFF, shading : THREE.SmoothShading } ) );
+			new THREE.MeshPhongMaterial( { color : rimC, shininess: 100, specular : rimSpecC, shading : THREE.SmoothShading } ) );
     rim.position.z = rimW / 2;
     rimTire.add( rim );
 	
@@ -527,27 +543,27 @@ function getRimTire() {
 function getRearWheel() {
 	var rearWheel = new THREE.Object3D();
     
-    var rearAxel = getWhiteFrameMesh(new THREE.CylinderGeometry( rearAxelR, rearAxelR, rearAxelL, 16, 3, false));
+    var rearAxel = getHubMesh(new THREE.CylinderGeometry( rearAxelR, rearAxelR, rearAxelL, 16, 3, false));
     rearAxel.rotation.x = 90 * Math.PI / 180;
     rearWheel.add(rearAxel);
 	
     var rearHub = new THREE.Object3D();
-    var rearHubCyl = getWhiteFrameMesh(new THREE.CylinderGeometry( rearHubR, rearHubR, rearHubD, 16, 3, false));
+    var rearHubCyl = getHubMesh(new THREE.CylinderGeometry( rearHubR, rearHubR, rearHubD, 16, 3, false));
     rearHubCyl.rotation.x = 90 * Math.PI / 180;
     rearHub.add(rearHubCyl);
     
-	var leftHubSphere = getWhiteFrameMesh(new THREE.SphereGeometry(rearHubR - 1, 32, 32));
+	var leftHubSphere = getHubMesh(new THREE.SphereGeometry(rearHubR - 1, 32, 32));
     leftHubSphere.position.z = -(rearHubD) / 2;
     var rearHubZOffset = rearAxelL / 2 - (rearHubD) / 2 - rearHubR - chainStayBotR - 2;
     rearHub.position.z = -rearHubZOffset;
     rearHub.add(leftHubSphere);
     
-    var leftRearHubFlang = getWhiteFrameMesh(new THREE.CylinderGeometry( rearHubFlangR, rearHubFlangR, rearHubFlangL, 16, 3, false));
+    var leftRearHubFlang = getHubMesh(new THREE.CylinderGeometry( rearHubFlangR, rearHubFlangR, rearHubFlangL, 16, 3, false));
     leftRearHubFlang.rotation.x = 90 * Math.PI / 180;
     leftRearHubFlang.position.z = -(rearHubD) / 2;
     rearHub.add(leftRearHubFlang);
     
-	var rightRearHubFlang = getWhiteFrameMesh(new THREE.CylinderGeometry( rearHubFlangR, rearHubFlangR, rearHubFlangL, 16, 3, false));
+	var rightRearHubFlang = getHubMesh(new THREE.CylinderGeometry( rearHubFlangR, rearHubFlangR, rearHubFlangL, 16, 3, false));
     rightRearHubFlang.rotation.x = 90 * Math.PI / 180;
     rightRearHubFlang.position.z = (rearHubD) / 2;
     rearHub.add(rightRearHubFlang);    
@@ -569,7 +585,9 @@ function getRearWheel() {
 	var hubz = i >= numRearSpokes ? -(rearHubD / 2 + rearHubZOffset) / 2 : (rearHubD / 2 - rearHubZOffset) / 2;
 	var spokeL = Math.sqrt(Math.pow(rimx - hubx, 2) + Math.pow(0 - huby, 2) + Math.pow(0 - hubz, 0));
 	
-	tube = getWhiteFrameMesh(new THREE.CylinderGeometry( spokeR, spokeR, spokeL, 16, 3, false));
+	var tube = new THREE.Mesh(
+			new THREE.CylinderGeometry( spokeR, spokeR, spokeL, 16, 3, false),
+			new THREE.MeshPhongMaterial( { color : spokeC, shininess: 100, specular : spokeSpecC, shading : THREE.SmoothShading } ) );
 	tube.position.y = spokeL / 2;	
 	tube.rotation.x = i >= numRearSpokes ? Math.asin((rearHubD / 2 + rearHubZOffset) / spokeL) : -Math.asin((rearHubD / 2 - rearHubZOffset) / spokeL);
 	
@@ -591,27 +609,25 @@ function getRearWheel() {
 function getFrontWheel(leftFork) {
 	var frontWheel = new THREE.Object3D();
     
-    var frontAxel = getWhiteFrameMesh(new THREE.CylinderGeometry( frontAxelR, frontAxelR, frontAxelL, 16, 3, false));
+    var frontAxel = getHubMesh(new THREE.CylinderGeometry( frontAxelR, frontAxelR, frontAxelL, 16, 3, false));
     frontAxel.rotation.x = 90 * Math.PI / 180;
     frontWheel.add(frontAxel);
-    //var frontHub = getWhiteFrameMesh(new THREE.CylinderGeometry( frontHubR, frontHubR, frontHubL, 16, 3, false));
-    //frontHub.rotation.x = 90 * Math.PI / 180;
-	var points = [];
+    var points = [];
 	var r = 268	//radius of the circle used to create the curve in the hub
 	for ( var i = 0; i < frontHubL; i += 4 ) {
 		points.push( new THREE.Vector3(frontHubR - (Math.sqrt(Math.pow(r, 2) - Math.pow(i - frontHubL / 2, 2)) - r), 0, i - frontHubL / 2 ));
 	}
 		
-	frontHub = getWhiteFrameMesh( new THREE.LatheGeometry( points, 20 ));	
+	frontHub = getHubMesh( new THREE.LatheGeometry( points, 20 ));	
     frontWheel.add(frontHub);
-    var leftFrontHubSpokeRing = getWhiteFrameMesh(new THREE.CylinderGeometry( frontHubFlangR, frontHubFlangR, frontHubFlangL, 16, 3, false));
-    leftFrontHubSpokeRing.rotation.x = 90 * Math.PI / 180;
-    leftFrontHubSpokeRing.position.z = -frontHubCentreToFlang;
-    frontWheel.add(leftFrontHubSpokeRing);
-    var rightFrontHubSpokeRing = getWhiteFrameMesh(new THREE.CylinderGeometry( frontHubFlangR, frontHubFlangR, frontHubFlangL, 16, 3, false));
-    rightFrontHubSpokeRing.rotation.x = 90 * Math.PI / 180;
-    rightFrontHubSpokeRing.position.z = frontHubCentreToFlang;
-    frontWheel.add(rightFrontHubSpokeRing);    
+    var leftFrontHubFlang = getHubMesh(new THREE.CylinderGeometry( frontHubFlangR, frontHubFlangR, frontHubFlangL, 16, 3, false));
+    leftFrontHubFlang.rotation.x = 90 * Math.PI / 180;
+    leftFrontHubFlang.position.z = -frontHubCentreToFlang;
+    frontWheel.add(leftFrontHubFlang);
+    var rightFrontHubFlang = getHubMesh(new THREE.CylinderGeometry( frontHubFlangR, frontHubFlangR, frontHubFlangL, 16, 3, false));
+    rightFrontHubFlang.rotation.x = 90 * Math.PI / 180;
+    rightFrontHubFlang.position.z = frontHubCentreToFlang;
+    frontWheel.add(rightFrontHubFlang);    
 
 	frontWheel.add( getRimTire() );
     	
@@ -620,7 +636,9 @@ function getFrontWheel(leftFork) {
     for (var i = 0; i < numFrontSpokes * 2; i++) {
 	var spokeA = (2 * Math.PI / numFrontSpokes) * i;
 	spokeA = i >= numFrontSpokes ? spokeA + (2 * Math.PI / (numFrontSpokes * 2)) : spokeA;
-	tube = getWhiteFrameMesh(new THREE.CylinderGeometry( spokeR, spokeR, spokeL, 16, 3, false));
+	var tube = new THREE.Mesh(
+			new THREE.CylinderGeometry( spokeR, spokeR, spokeL, 16, 3, false),
+			new THREE.MeshPhongMaterial( { color : spokeC, shininess: 100, specular : spokeSpecC, shading : THREE.SmoothShading } ) );
 	tube.position.y = spokeL / 2;
 	var xRot = Math.asin(frontHubCentreToFlang / spokeL);
 	tube.rotation.x = i >= numFrontSpokes ? xRot : -xRot;
